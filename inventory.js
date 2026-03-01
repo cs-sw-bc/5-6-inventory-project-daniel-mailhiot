@@ -19,7 +19,26 @@ const dispatchStack = [];
 // 4. Add the new product object to the inventory array.
 // 5. Optionally, print a success message like "Product added successfully."
 function addProduct(id, name, category, price, quantity) {
-    // TODO: implement
+    // Check for duplicate id
+    for (let i = 0; i < inventory.length; i++) {
+        if (inventory[i].id === id) { // compare existing product id with incoming id
+            console.log(`Product with ID ${id} already exists.`)
+            return; // stop function so duplicate is not added
+        }
+    }
+    // Create new product object (only runs if no duplicate was found)
+    const newProduct = {
+        id: id,
+        name: name,
+        category: category,
+        price: price,
+        quantity: quantity
+    };
+
+    // Using nextIndex instead of .push since I'm not sure if .push is allowed
+    let nextIndex = inventory.length; // next open position is always inventory.length
+    inventory[nextIndex] = newProduct; // add product at that index 
+    console.log(`Product ${id} added successfully.`);
 }
 
 // 2) Update Product fields
@@ -31,7 +50,17 @@ function addProduct(id, name, category, price, quantity) {
 // 5. Optionally, print a success message like "Product updated successfully."
 function updateProduct(id, updates) {
     // updates object may contain: { price, category, quantity }
-    // TODO: implement
+    // Search for product by id
+    for (let i = 0; i < inventory.length; i++) {
+        if (inventory[i].id === id) {
+            for (let key in updates) {
+                inventory[i][key] = updates[key];
+            }
+            console.log(`Product ${id} updated successfully.`)
+            return;
+        }
+    }
+    console.log(`Product with ID ${id} not found.`)
 }
 
 // 3) Delete Product from inventory
@@ -41,7 +70,14 @@ function updateProduct(id, updates) {
 // 3. If the product is found, use the splice method to remove it from the inventory array at the found index.
 // 4. Optionally, print a success message like "Product deleted successfully."
 function deleteProduct(id) {
-    // TODO: implement
+    for (let i = 0; i < inventory.length; i++) {
+        if (inventory[i].id === id) {
+            inventory.splice(i, 1)
+            console.log(`Product with ID ${id} deleted successfully.`)
+            return
+        }
+    }
+    console.log(`Product with ID ${id} not found.`)
 }
 
 // 4) Search Products
@@ -52,7 +88,12 @@ function deleteProduct(id) {
 // 3. If a match is found, return the product object.
 // 4. If no match is found after looping through all products, return null.
 function searchByName(name) {
-    // TODO: implement
+    for (let i = 0; i < inventory.length; i++) {
+        if (inventory[i].name === name) {
+            return inventory[i];
+        }
+    }
+    return null;
 }
 
 // Search by category (exact match) - return array of products
@@ -63,7 +104,13 @@ function searchByName(name) {
 // 4. If it matches, push the product object into the results array.
 // 5. After looping, return the results array (which may be empty if no matches).
 function searchByCategory(category) {
-    // TODO: implement
+    let results = []
+    for (let i = 0; i < inventory.length; i++) {
+        if (inventory[i].category === category) {
+            results.push(inventory[i])
+        }
+    }
+    return results
 }
 
 // 5) Sort Inventory
@@ -78,7 +125,19 @@ function searchByCategory(category) {
 // 4. If inventory[j].price > inventory[j+1].price, swap the two product objects.
 // 5. Continue until the array is sorted in ascending order by price.
 function sortByPrice() {
-    // TODO: implement (bubble sort or similar)
+    // Outer loop controls how many full passes arre done through the array, moving the largest remaining price to the end
+    for (let i = 0; i < inventory.length - 1; i++) {
+        // Inner loop compares products next to each other, stopping at "length - i - 1" because the last i items are already sorted
+        for (let j = 0; j < inventory.length - i - 1; j++) {
+            // Compare current product price with the next product price
+            if (inventory[j].price > inventory[j+1].price) {
+                // Swap the two entire product objects
+                let temp = inventory[j]; // save current product in a temporary variable
+                inventory[j] = inventory[j+1]; // move the next product into current position.
+                inventory[j +1] = temp; // put the saved product into the next position.
+            }
+        }
+    }
 }
 
 // Sort by name A→Z
@@ -89,7 +148,15 @@ function sortByPrice() {
 // 4. If inventory[j].name > inventory[j+1].name (lexicographically), swap the two product objects.
 // 5. Continue until the array is sorted in ascending alphabetical order by name.
 function sortByName() {
-    // TODO: implement
+    for (let i = 0; i < inventory.length - 1; i++) { // bubble sort passes
+        for (let j = 0; j < inventory.length - i - 1; j++) { // compare adjacent names
+            if (inventory[j].name > inventory[j+1].name) { // if left name comes after right name alphabetically, swap
+                let temp = inventory[j];
+                inventory[j] = inventory[j+1];
+                inventory[j+1] = temp;
+            }
+        }
+    }
 }
 
 // Sort by category A→Z
@@ -100,7 +167,15 @@ function sortByName() {
 // 4. If inventory[j].category > inventory[j+1].category (lexicographically), swap the two product objects.
 // 5. Continue until the array is sorted in ascending alphabetical order by category.
 function sortByCategory() {
-    // TODO: implement
+    for (let i = 0; i < inventory.length - 1; i++) {
+        for (let j = 0; j < inventory.length - i - 1; j++) {
+            if (inventory[j].category > inventory[j+1].category) {
+                let temp = inventory[j];
+                inventory[j] = inventory[j+1];
+                inventory[j+1] = temp;
+            }
+        }
+    }
 }
 
 // ============================================
@@ -115,8 +190,27 @@ function sortByCategory() {
 // 2. Create a new order object with properties: orderId, productId, quantity.
 // 3. Add (push) the order object to the end of the orderQueue array.
 // 4. Optionally, print a success message like "Order placed successfully."
+/*
 function placeOrder(orderId, productId, quantity) {
-    // TODO: implement
+    if (quantity > 0) {
+        let order = {orderId, productId, quantity}
+        orderQueue.push(order)
+        console.log(`Order ID ${orderId} placed successfully.`)
+        return;
+    }
+    console.log("Invalid quantity: must be greater than 0.")
+}
+*/
+
+// Re-structured to follow instructions more accurately:
+function placeOrder(orderId, productId, quantity) {
+    if (quantity <= 0) {
+        console.log("Invalid quantity: must be greater than 0.");
+        return;
+    }
+    let order = { orderId, productId, quantity };
+    orderQueue.push(order);
+    console.log(`Order ID ${orderId} placed successfully.`);
 }
 
 // 7) Process Next Order (Dequeue → Dispatch)
@@ -133,8 +227,28 @@ function placeOrder(orderId, productId, quantity) {
 // 6. If sufficient stock, reduce product.quantity by order.quantity, and push the order to dispatchStack.
 // 7. If insufficient stock, print "Insufficient stock for order {orderId}." and decide (e.g., put back to queue or discard).
 function processNextOrder() {
-    // TODO: implement
+    if (orderQueue.length <= 0) { // Step 1
+        console.log("No orders to process.")
+        return;
+    } 
+    let order = orderQueue.shift() // Step 2
+    for (let i = 0; i < inventory.length; i++) {
+        if (order.productId === inventory[i].id) { // Step 3
+            if (order.quantity <= inventory[i].quantity) { // Step 5
+                inventory[i].quantity = inventory[i].quantity - order.quantity // Step 6
+                dispatchStack.push(order)
+                console.log(`Order ${order.orderId} processed successfully.`); // success
+                return;
+            }
+            console.log(`Insufficient stock for order ${order.orderId}`) // Step 7 (discard the order)
+            return;
+            
+        }
+    }
+    console.log(`Product not found for order ${order.orderId}.`) // Step 4 (discard the order)
+    return;
 }
+
 
 // ============================================
 // PART 3: DISPATCH STACK (LIFO)
@@ -152,7 +266,19 @@ function processNextOrder() {
 // 5. Push the order back to the end of orderQueue.
 // 6. Optionally, print a success message like "Last dispatch undone."
 function undoLastDispatch() {
-    // TODO: implement
+    if (dispatchStack.length <= 0) { // Step 1
+        console.log("No dispatches to undo.")
+        return;
+    }
+    let order = dispatchStack.pop() // Step 2
+    for (let i = 0; i < inventory.length; i++) {
+        if (order.productId === inventory[i].id) { // Step 3
+            inventory[i].quantity = inventory[i].quantity + order.quantity // Step 4
+            orderQueue.push(order) // Step 5
+            console.log("Last dispatch undone.") // Step 6
+            return;
+        }
+    }
 }
 
 // ============================================
@@ -169,6 +295,12 @@ console.log("Inventory after adding:", inventory);
 
 updateProduct(1, { quantity: 3 });
 console.log("After updating product 1:", inventory[0]);
+
+// deleteProduct(1)
+// console.log(searchByCategory("Electronics"))
+// sortByPrice()
+// sortByName()
+// sortByCategory()
 
 placeOrder(101, 1, 2);
 placeOrder(102, 2, 5);
